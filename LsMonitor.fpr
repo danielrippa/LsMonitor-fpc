@@ -1,0 +1,38 @@
+program LsMonitor;
+
+  {$mode delphi}
+
+  uses
+    Windows;
+
+  type
+
+    MONITORINFO = record
+      cbSize: DWORD;
+      rcMonitor: RECT;
+      rcWork: RECT;
+      dwFlags: DWORD;
+      szDevice: array[0..31] of AnsiChar;
+    end;
+    PMONITORINFO = ^MONITORINFO;
+
+    TMonitorEnumProc = function (hMonitor: HMONITOR; hdcMonitor: HDC; lprcMonitor: PRect; lParam: LPARAM): BOOL; stdcall;
+
+  function GetMonitorInfoA(hMonitor: HMONITOR; lpmi: PMONITORINFO): BOOL; stdcall; external 'user32.dll';
+  function EnumDisplayMonitors(hdc: HDC; lprcClip: PRect; lpfnEnum: TMonitorEnumProc; lParam: LPARAM): BOOL; stdcall; external 'user32.dll';
+
+  function EnumMonitorsCallback(hMonitor: HMONITOR; hdcMonitor: HDC; lprcMonitor: PRect; lParam: LPARAM): BOOL; stdcall;
+  var
+    MI: MONITORINFO;
+  begin
+    MI.cbSize := SizeOf(MONITORINFO);
+    GetMonitorInfoA(hMonitor, @MI);
+
+    WriteLn(MI.szDevice);
+
+    Result := True;
+  end;
+
+begin
+  EnumDisplayMonitors(0, Nil, @EnumMonitorsCallback, 0);
+end.
